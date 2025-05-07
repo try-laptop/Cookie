@@ -1,19 +1,19 @@
+// src/components/upload-client-page.tsx
 'use client';
 
-import React, { useState, useEffect, useRef, useTransition } from 'react';
-import { useActionState } from 'react';
-import { uploadFile, type UploadResponse, deleteFileAction, type DeleteResponse } from '@/app/actions';
+import React, { useState, useEffect, useRef, useTransition, useActionState as useReactActionState } from 'react';
+import { uploadSessionFileAction, type UploadSessionResponse, deleteSessionFileAction, type DeleteSessionResponse } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, AlertCircle, CheckCircle, Copy, ExternalLink, Trash2, RotateCcw, FileJson } from 'lucide-react';
+import { UploadCloud, AlertCircle, Copy, ExternalLink, Trash2, RotateCcw, FileJson } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
-const initialUploadState: UploadResponse = { success: false };
-const initialDeleteState: DeleteResponse = { success: false };
+const initialUploadState: UploadSessionResponse = { success: false };
+const initialDeleteState: DeleteSessionResponse = { success: false };
 
 interface UploadClientPageProps {
   onUploadSuccess?: (fileId: string, fileName: string) => void;
@@ -28,8 +28,8 @@ export default function UploadClientPage({
   latestFileId: initialLatestFileId, 
   latestFileName: initialLatestFileName 
 }: UploadClientPageProps) {
-  const [uploadFormState, uploadFormAction, isUploadPending] = useActionState(uploadFile, initialUploadState);
-  const [deleteFormState, deleteFormAction, isDeletePending] = useActionState(deleteFileAction, initialDeleteState);
+  const [uploadFormState, uploadFormAction, isUploadPending] = useReactActionState(uploadSessionFileAction, initialUploadState);
+  const [deleteFormState, deleteFormAction, isDeletePending] = useReactActionState(deleteSessionFileAction, initialDeleteState);
   
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [currentFileId, setCurrentFileId] = useState<string | null>(initialLatestFileId || null);
@@ -41,7 +41,7 @@ export default function UploadClientPage({
 
   useEffect(() => {
     if (uploadFormState.error) {
-      // Error is handled by the Alert component below
+      // Error is handled by the Alert component below for initial upload
     } else if (uploadFormState.success && uploadFormState.fileId && uploadFormState.fileName) {
       toast({
         title: 'Upload Successful!',
@@ -120,7 +120,6 @@ export default function UploadClientPage({
       fileInputRef.current.value = '';
     }
     setSelectedFileName(null);
-    // Visually, this is enough. The form state will be overridden on next submit.
     toast({ title: 'Form Cleared', description: 'You can now select a new .json file.'});
   };
 
@@ -137,7 +136,7 @@ export default function UploadClientPage({
                 id="file-upload"
                 name="file"
                 type="file"
-                accept=".json" // Changed from .txt
+                accept=".json" 
                 required
                 onChange={handleFileChange}
                 ref={fileInputRef}
@@ -156,7 +155,7 @@ export default function UploadClientPage({
           </div>
           <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isActionPending || !selectedFileName}>
             <UploadCloud className="mr-2 h-4 w-4" />
-            {isUploadPending || isTransitionPending && !isDeletePending ? 'Sharing...' : 'Share Session File'}
+            {isUploadPending || (isTransitionPending && !isDeletePending) ? 'Sharing...' : 'Share Session File'}
           </Button>
         </form>
       )}
@@ -172,7 +171,7 @@ export default function UploadClientPage({
       {currentFileId && currentFileName && (
         <Card className="mt-6 bg-secondary/50">
           <CardContent className="pt-6 space-y-3">
-            <div className="flex items-center text-green-600">
+            <div className="flex items-center text-primary"> 
               <FileJson className="h-5 w-5 mr-2" />
               <p className="font-semibold">Session file shared: <span className="font-bold">{currentFileName}</span></p>
             </div>
@@ -210,7 +209,7 @@ export default function UploadClientPage({
                   {isDeletePending || (isTransitionPending && !isUploadPending) ? 'Deleting...' : 'Delete This Session File'}
                 </Button>
               </form>
-              {deleteFormState.error && !isActionPending && ( // Show only if not pending and error exists
+              {deleteFormState.error && !isActionPending && ( 
                  <Alert variant="destructive" className="mt-2">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Delete Failed</AlertTitle>
@@ -224,11 +223,11 @@ export default function UploadClientPage({
   );
 }
 
-function copyToClipboard(text: string, toast: (options: any) => void) {
+function copyToClipboard(text: string, toastFn: (options: any) => void) {
   navigator.clipboard.writeText(text).then(() => {
-    toast({ title: 'Link Copied!', description: 'Shareable link copied to clipboard.' });
+    toastFn({ title: 'Link Copied!', description: 'Shareable link copied to clipboard.' });
   }).catch(err => {
-    toast({ title: 'Copy Failed', description: 'Could not copy link to clipboard.', variant: 'destructive' });
+    toastFn({ title: 'Copy Failed', description: 'Could not copy link to clipboard.', variant: 'destructive' });
     console.error('Failed to copy text: ', err);
   });
 }
