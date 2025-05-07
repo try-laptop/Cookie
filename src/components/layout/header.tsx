@@ -66,7 +66,7 @@ export default function Header() {
               variant="outline" 
               size="sm" 
               onClick={() => setIsExtensionManagerOpen(true)}
-              className="hover:bg-background hover:text-foreground" // Override default outline hover
+              className="bg-background text-foreground" // Override default outline hover
             >
               <Package className="mr-2 h-4 w-4" />
               Manage Extension
