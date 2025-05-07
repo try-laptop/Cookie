@@ -1,0 +1,7 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/download/[fileId]/route": "/api/download/[fileId]",
+  "/favicon.ico/route": "/favicon.ico",
+  "/download/[fileId]/page": "/download/[fileId]",
+  "/page": "/"
+}
