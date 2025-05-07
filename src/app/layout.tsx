@@ -39,7 +39,7 @@ export default function RootLayout({
         )}
       >
         <Header />
-        <main className="flex-grow flex flex-col items-center p-4 sm:p-6 md:p-8">
+        <main className="flex-grow flex flex-col items-center p-4 sm:p-6 md:p-8 w-full">
           {children}
         </main>
         <Toaster />

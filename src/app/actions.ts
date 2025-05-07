@@ -1,7 +1,8 @@
 'use server';
 
 import { z } from 'zod';
-import { addFileToStore } from '@/lib/file-store';
+import { addFileToStore, deleteFileFromStore, getLatestFileMetadataFromStore, type StoredFile } from '@/lib/file-store';
+import { revalidatePath } from 'next/cache';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_FILE_EXTENSIONS = ['.txt'];
@@ -12,7 +13,6 @@ const UploadResponseSchema = z.object({
   fileName: z.string().optional(),
   error: z.string().optional(),
 });
-
 export type UploadResponse = z.infer<typeof UploadResponseSchema>;
 
 export async function uploadFile(
@@ -40,7 +40,6 @@ export async function uploadFile(
 
   try {
     const content = await file.text();
-    // Ensure mimeType is 'text/plain' for .txt files, even if browser reports something else
     const mimeType = 'text/plain'; 
     
     const storedFile = addFileToStore({
@@ -49,10 +48,60 @@ export async function uploadFile(
       mimeType: mimeType,
       size: file.size,
     });
-
+    
+    revalidatePath('/'); // Revalidate home page to update receiver tab
+    revalidatePath(`/download/${storedFile.id}`);
     return { success: true, fileId: storedFile.id, fileName: storedFile.fileName };
   } catch (e) {
     console.error('File upload processing error:', e);
     return { success: false, error: 'An unexpected error occurred while processing the file.' };
+  }
+}
+
+const DeleteResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string().optional(),
+  error: z.string().optional(),
+});
+export type DeleteResponse = z.infer<typeof DeleteResponseSchema>;
+
+export async function deleteFileAction(
+  prevState: DeleteResponse,
+  formData: FormData
+): Promise<DeleteResponse> {
+  const fileId = formData.get('fileId') as string | null;
+
+  if (!fileId) {
+    return { success: false, error: 'File ID is missing.' };
+  }
+
+  try {
+    const deleted = deleteFileFromStore(fileId);
+    if (deleted) {
+      revalidatePath('/'); // Revalidate home page
+      revalidatePath(`/download/${fileId}`); // Revalidate download page if it exists
+      return { success: true, message: 'File deleted successfully.' };
+    } else {
+      return { success: false, error: 'File not found or already deleted.' };
+    }
+  } catch (e) {
+    console.error('File deletion error:', e);
+    return { success: false, error: 'An unexpected error occurred while deleting the file.' };
+  }
+}
+
+const FileMetadataResponseSchema = z.object({
+    file: z.custom<Omit<StoredFile, 'content'>>().nullable(),
+    error: z.string().optional(),
+});
+export type FileMetadataResponse = z.infer<typeof FileMetadataResponseSchema>;
+
+export async function getLatestSharedFileMetadataAction(): Promise<FileMetadataResponse> {
+  try {
+    const fileMetadata = getLatestFileMetadataFromStore();
+    return { file: fileMetadata || null };
+  } catch (e) {
+    console.error('Error fetching latest file metadata:', e);
+    return { file: null, error: 'Failed to fetch latest file information.' };
   }
 }
