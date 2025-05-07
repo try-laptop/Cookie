@@ -5,7 +5,7 @@ import { addFileToStore, deleteFileFromStore, getLatestFileMetadataFromStore, ty
 import { revalidatePath } from 'next/cache';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FILE_EXTENSIONS = ['.txt'];
+const ACCEPTED_FILE_EXTENSIONS = ['.json']; // Changed from .txt to .json
 
 const UploadResponseSchema = z.object({
   success: z.boolean(),
@@ -22,7 +22,7 @@ export async function uploadFile(
   const file = formData.get('file') as File | null;
 
   if (!file) {
-    return { success: false, error: 'No file selected. Please choose a .txt file.' };
+    return { success: false, error: 'No file selected. Please choose a .json file.' };
   }
 
   if (file.size === 0) {
@@ -35,12 +35,12 @@ export async function uploadFile(
 
   const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
   if (!fileExtension || !ACCEPTED_FILE_EXTENSIONS.includes(fileExtension)) {
-    return { success: false, error: 'Invalid file type. Only .txt files are allowed.' };
+    return { success: false, error: 'Invalid file type. Only .json files are allowed.' };
   }
 
   try {
-    const content = await file.text();
-    const mimeType = 'text/plain'; 
+    const content = await file.text(); // JSON content will be a string
+    const mimeType = 'application/json'; // Changed from text/plain
     
     const storedFile = addFileToStore({
       fileName: file.name,
@@ -80,13 +80,13 @@ export async function deleteFileAction(
     if (deleted) {
       revalidatePath('/'); // Revalidate home page
       revalidatePath(`/download/${fileId}`); // Revalidate download page if it exists
-      return { success: true, message: 'File deleted successfully.' };
+      return { success: true, message: 'Session file deleted successfully.' };
     } else {
-      return { success: false, error: 'File not found or already deleted.' };
+      return { success: false, error: 'Session file not found or already deleted.' };
     }
   } catch (e) {
     console.error('File deletion error:', e);
-    return { success: false, error: 'An unexpected error occurred while deleting the file.' };
+    return { success: false, error: 'An unexpected error occurred while deleting the session file.' };
   }
 }
 
@@ -102,6 +102,6 @@ export async function getLatestSharedFileMetadataAction(): Promise<FileMetadataR
     return { file: fileMetadata || null };
   } catch (e) {
     console.error('Error fetching latest file metadata:', e);
-    return { file: null, error: 'Failed to fetch latest file information.' };
+    return { file: null, error: 'Failed to fetch latest session file information.' };
   }
 }

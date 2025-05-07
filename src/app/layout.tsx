@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'FileShare - Easy Text File Sharing',
-  description: 'Upload .txt files and share them easily with a unique link.',
+  title: 'SessionShare - Easy Session File Sharing', // Updated title
+  description: 'Upload .json session files and share them easily with a unique link.', // Updated description
   icons: {
     // Consider adding a generic icon or removing this if no specific icon is available
     // icon: "/favicon.ico", 

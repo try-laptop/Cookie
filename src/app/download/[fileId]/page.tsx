@@ -1,9 +1,11 @@
 import { getFileMetadataFromStore } from '@/lib/file-store';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Download, FileJson, AlertTriangle, ArrowLeft } from 'lucide-react'; // Changed FileText to FileJson
 import Link from 'next/link';
-import { format } from 'date-fns';
+// import { format } from 'date-fns'; // No longer needed directly here
+import { ClientDateTime } from '@/components/client-datetime';
+
 
 interface DownloadPageProps {
   params: {
@@ -22,11 +24,11 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
             <div className="flex justify-center text-destructive mb-3">
               <AlertTriangle className="h-12 w-12" />
             </div>
-            <CardTitle className="text-2xl">File Not Found</CardTitle>
+            <CardTitle className="text-2xl">Session File Not Found</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              The file you are looking for does not exist or may have been removed.
+              The session file you are looking for does not exist or may have been removed.
             </p>
           </CardContent>
           <CardFooter className="flex justify-center">
@@ -48,7 +50,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
       <Card className="shadow-xl">
         <CardHeader className="text-center bg-secondary/30 rounded-t-lg py-8">
           <div className="flex justify-center items-center mb-4 text-primary">
-            <FileText className="h-12 w-12" />
+            <FileJson className="h-12 w-12" /> {/* Changed Icon */}
           </div>
           <CardTitle className="text-2xl font-semibold">{fileMetadata.fileName}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
@@ -59,19 +61,19 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
           <div className="text-sm">
             <p><strong>File Name:</strong> {fileMetadata.fileName}</p>
             <p><strong>File Size:</strong> {fileSizeKB} KB</p>
-            <p><strong>Uploaded:</strong> {format(new Date(fileMetadata.uploadedAt), "MMMM d, yyyy 'at' h:mm a")}</p>
+            <p><strong>Uploaded:</strong> <ClientDateTime date={fileMetadata.uploadedAt} /></p>
           </div>
           <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
             <a href={`/api/download/${params.fileId}`} download={fileMetadata.fileName}>
               <Download className="mr-2 h-4 w-4" />
-              Download File
+              Download Session File
             </a>
           </Button>
         </CardContent>
          <CardFooter className="flex justify-center pt-0 pb-6">
             <Button asChild variant="outline" size="sm">
               <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Upload Another File
+                <ArrowLeft className="mr-2 h-4 w-4" /> Share Another Session File {/* Updated Text */}
               </Link>
             </Button>
           </CardFooter>
