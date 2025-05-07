@@ -1,0 +1,42 @@
+The "File wasn't available on site" error, especially after an upload, strongly suggests an issue with the in-memory storage, likely due to the Next.js development server reloading modules and resetting the store.
+
+I've added `console.log` statements to `src/lib/extension-store.ts` and `src/lib/file-store.ts`.
+
+**Here's how to use this to diagnose the issue:**
+
+1.  **Run your development server (`npm run dev`).**
+2.  **Open your browser's developer console AND your server's terminal console.**
+3.  **Perform an extension upload:**
+    *   You should see logs in your **server terminal console** like:
+        *   `[SessionShare] extension-store.ts module evaluated ...` (This should ideally appear only once when the server starts).
+        *   `[SessionShare] Initial extensionStore size: 0`
+        *   When you upload: `[SessionShare] Deleting existing extension file from store.` (if one existed)
+        *   `[SessionShare] Added extension file: your-extension.zip, store size: 1`
+4.  **Attempt to download the extension:**
+    *   When you click the download link, the API route `/api/download-extension` will be called.
+    *   You should see logs in your **server terminal console** from this API call:
+        *   `[SessionShare] getExtensionFileFromStore called. File found: true. Store size: 1` (This is what you want to see).
+        *   If you see `[SessionShare] getExtensionFileFromStore called. File found: false. Store size: 0`, it means the store was empty when the download was attempted.
+
+**Interpreting the Logs:**
+
+*   **If `[SessionShare] extension-store.ts module evaluated` appears in your server console *again* between the upload action and the download attempt:** This confirms the Next.js development server reloaded the module, which re-initialized `extensionStore` to an empty `Map`. This is a common characteristic of in-memory stores in a hot-reloading development environment.
+*   **If the store size is 1 after upload, but 0 during the download attempt (without a "module evaluated" message in between):** This would be more unusual and point to a different bug, but the module reload is the most common cause.
+
+**Explanation and What This Means:**
+
+The application uses an **in-memory store**. This means data is stored in variables within the running server process.
+*   **Advantage:** Simple for demos.
+*   **Disadvantage:** Data is lost if the server restarts. In a Next.js development environment, file changes (even sometimes indirectly caused by actions like uploads if they touch certain watched files or trigger revalidation in a way that Next.js interprets as needing a reload) can cause the server to restart or re-evaluate modules. When `src/lib/extension-store.ts` is re-evaluated, the `extensionStore = new Map()` line runs again, effectively clearing your stored file.
+
+**This is a limitation of using in-memory storage for a dynamic application in a development environment with hot-reloading.**
+
+**To make this robust for production (or even more stable in development):**
+You would need to replace the in-memory `Map` with a persistent storage solution:
+*   **File System:** Save the uploaded ZIP to a folder on the server.
+*   **Database:** Store the file (or metadata and a path to it) in a database.
+*   **Cloud Storage:** Use services like Firebase Storage, AWS S3, etc.
+
+For your current project, understand that this "disappearing file" behavior is likely due to the dev environment and the nature of in-memory storage. The console logs will help confirm this.
+
+I've also updated the `README.md` to include a section explaining these limitations of in-memory storage.
