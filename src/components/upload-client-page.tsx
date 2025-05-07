@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react'; // Changed from 'react-dom' and renamed from useFormState
 import { uploadFile, type UploadResponse } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ const initialState: UploadResponse = {
 };
 
 export default function UploadClientPage() {
-  const [formState, formAction] = useFormState(uploadFile, initialState);
+  const [formState, formAction] = useActionState(uploadFile, initialState); // Changed from useFormState
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
