@@ -11,10 +11,25 @@ export interface StoredExtensionFile {
   uploadedAt: Date;
 }
 
-// Using a global Map to simulate a persistent store for the demo.
-// Only one extension file will be stored at a time.
 const EXTENSION_STORE_KEY = 'chrome-extension-zip';
-const extensionStore = new Map<string, StoredExtensionFile>();
+
+// Ensure a single instance of the store, especially in dev with HMR
+declare global {
+  // eslint-disable-next-line no-var
+  var __extensionStore__: Map<string, StoredExtensionFile> | undefined;
+}
+
+let extensionStore: Map<string, StoredExtensionFile>;
+
+if (process.env.NODE_ENV === 'production') {
+  extensionStore = new Map<string, StoredExtensionFile>();
+} else {
+  if (!globalThis.__extensionStore__) {
+    globalThis.__extensionStore__ = new Map<string, StoredExtensionFile>();
+  }
+  extensionStore = globalThis.__extensionStore__;
+}
+
 
 export function addExtensionFileToStore(file: {
   fileName: string;
@@ -28,10 +43,7 @@ export function addExtensionFileToStore(file: {
     id,
     uploadedAt: new Date(),
   };
-  // Remove any existing extension before adding the new one
-  if (extensionStore.has(EXTENSION_STORE_KEY)) {
-    extensionStore.delete(EXTENSION_STORE_KEY);
-  }
+  // Overwrite any existing extension by using .set()
   extensionStore.set(id, newFile);
   return newFile;
 }

@@ -51,7 +51,7 @@ export default function Header() {
           </Link>
           <div className="flex items-center gap-2">
             {!isLoadingExtensionMeta && extensionFile && (
-              <Button variant="outline" size="sm" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+              <Button variant="outline" size="sm" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary">
                 <a href="/api/download-extension" download={extensionFile.fileName}>
                   <DownloadIcon className="mr-2 h-4 w-4" />
                   Download Extension
@@ -62,7 +62,7 @@ export default function Header() {
               variant="outline" 
               size="sm" 
               onClick={() => setIsExtensionManagerOpen(true)}
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              className="bg-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary"
             >
               <Package className="mr-2 h-4 w-4" />
               Manage Extension
