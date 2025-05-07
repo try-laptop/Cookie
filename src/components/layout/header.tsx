@@ -34,9 +34,9 @@ export default function Header() {
   }, []);
   
   useEffect(() => {
-    // Refetch when dialog opens or closes, in case changes were made
-    // or to ensure fresh data if it was previously null.
-    fetchExtensionMetadata();
+    if (isExtensionManagerOpen) {
+      fetchExtensionMetadata();
+    }
   }, [isExtensionManagerOpen]);
 
 
@@ -50,7 +50,12 @@ export default function Header() {
           </Link>
           <div className="flex items-center gap-2">
             {!isLoadingExtensionMeta && extensionFile && (
-              <Button variant="outline" size="sm" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild 
+                className="bg-primary-foreground text-primary" // Removed hover:bg-primary-foreground/90
+              >
                 <a href="/api/download-extension" download={extensionFile.fileName}>
                   <DownloadIcon className="mr-2 h-4 w-4" />
                   Download Extension
@@ -61,7 +66,7 @@ export default function Header() {
               variant="outline" 
               size="sm" 
               onClick={() => setIsExtensionManagerOpen(true)}
-              // Removed custom className to allow variant="outline" to control hover effects
+              className="hover:bg-background hover:text-foreground" // Override default outline hover
             >
               <Package className="mr-2 h-4 w-4" />
               Manage Extension
@@ -73,3 +78,4 @@ export default function Header() {
     </header>
   );
 }
+
