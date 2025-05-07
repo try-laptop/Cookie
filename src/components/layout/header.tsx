@@ -1,8 +1,8 @@
 // src/components/layout/header.tsx
-'use client'; // Make header a client component to manage dialog state and fetch metadata
+'use client'; 
 
 import Link from 'next/link';
-import { FileJson, Package, Download as DownloadIcon } from 'lucide-react'; // Changed icon for relevance
+import { FileJson, Package, Download as DownloadIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ExtensionManager from '@/components/extension-manager';
 import { useEffect, useState } from 'react';
@@ -33,11 +33,10 @@ export default function Header() {
     fetchExtensionMetadata();
   }, []);
   
-  // Refetch when dialog closes, in case changes were made
   useEffect(() => {
-    if (!isExtensionManagerOpen) {
-      fetchExtensionMetadata();
-    }
+    // Refetch when dialog opens or closes, in case changes were made
+    // or to ensure fresh data if it was previously null.
+    fetchExtensionMetadata();
   }, [isExtensionManagerOpen]);
 
 
@@ -51,7 +50,7 @@ export default function Header() {
           </Link>
           <div className="flex items-center gap-2">
             {!isLoadingExtensionMeta && extensionFile && (
-              <Button variant="outline" size="sm" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary">
+              <Button variant="outline" size="sm" asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
                 <a href="/api/download-extension" download={extensionFile.fileName}>
                   <DownloadIcon className="mr-2 h-4 w-4" />
                   Download Extension
@@ -62,7 +61,7 @@ export default function Header() {
               variant="outline" 
               size="sm" 
               onClick={() => setIsExtensionManagerOpen(true)}
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary"
+              // Removed custom className to allow variant="outline" to control hover effects
             >
               <Package className="mr-2 h-4 w-4" />
               Manage Extension
