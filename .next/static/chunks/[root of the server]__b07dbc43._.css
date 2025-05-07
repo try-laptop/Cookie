@@ -850,6 +850,10 @@ body {
   min-height: 80px;
 }
 
+.min-h-\[calc\(100vh-10rem\)\] {
+  min-height: calc(100vh - 10rem);
+}
+
 .min-h-screen {
   min-height: 100vh;
 }
@@ -1958,14 +1962,6 @@ body {
   background-color: hsl(var(--sidebar-accent));
 }
 
-.hover\:bg-primary-foreground:hover {
-  background-color: hsl(var(--primary-foreground));
-}
-
-.hover\:bg-background:hover {
-  background-color: hsl(var(--background));
-}
-
 .hover\:text-accent-foreground:hover {
   color: hsl(var(--accent-foreground));
 }
@@ -1980,10 +1976,6 @@ body {
 
 .hover\:text-sidebar-accent-foreground:hover {
   color: hsl(var(--sidebar-accent-foreground));
-}
-
-.hover\:text-primary:hover {
-  color: hsl(var(--primary));
 }
 
 .hover\:underline:hover {
